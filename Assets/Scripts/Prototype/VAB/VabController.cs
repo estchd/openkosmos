@@ -2,6 +2,7 @@ using System.IO;
 using Kosmos.Prototype.Parts;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 namespace Kosmos.Prototype.Vab
@@ -21,7 +22,7 @@ namespace Kosmos.Prototype.Vab
         [SerializeField] private InputActionReference _mouseDelta;
         
         [Header("Camera Control")]
-        [SerializeField] private float _cameraMoveSpeed = 0.5f;
+        [SerializeField] private float _cameraMoveSpeed = 10.0f;
         [SerializeField] private float _cameraRotateSpeed = 10.0f;
         
         private PartCollection _vehicleRoot;
@@ -40,12 +41,24 @@ namespace Kosmos.Prototype.Vab
         void Start()
         {
             _partPickerPanel.OnPartPicked += OnPartPickerClicked;
-            
+            _partPickerPanel.OnLaunchButtonClicked += async () => await OnLaunchButtonClicked();
+
             _currentGizmo = _moveGizmo;
 
             _vehicleRoot = new GameObject("VehicleRoot").AddComponent<PartCollection>();
             SelectPart(null);
 
+        }
+
+        private async Awaitable OnLaunchButtonClicked()
+        {
+            string flightControlScenceName = "Prototype_FlightControl";
+            Scene currentScene = SceneManager.GetActiveScene();
+            await SceneManager.LoadSceneAsync(flightControlScenceName, LoadSceneMode.Additive);
+
+            SceneManager.MoveGameObjectToScene(_vehicleRoot.gameObject, SceneManager.GetSceneByName(flightControlScenceName));
+
+            await SceneManager.UnloadSceneAsync(currentScene);
         }
 
         private void OnPartPickerClicked(PartDefinition part)
