@@ -1,5 +1,6 @@
 ﻿using PCB.Icosahedron.ECS.Components;
 using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Transforms;
 using UnityEngine;
@@ -31,6 +32,7 @@ namespace PCB.Icosahedron.ECS.Systems
 
     public partial struct NodeRootReferenceUpdateJob : IJobEntity
     {
+        [ReadOnly]
         public ComponentLookup<LocalToWorld> LocalToWorldLookup;
 
         public void Execute(ref NodeRootReferenceComponent rootReferenceComponent)

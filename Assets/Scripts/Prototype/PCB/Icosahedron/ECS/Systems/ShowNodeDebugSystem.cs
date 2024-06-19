@@ -24,15 +24,15 @@ namespace PCB.Icosahedron.ECS.Systems
         }
     }
     
+    [WithNone(typeof(NodeSubdividedLeftNeighborsComponent))]
+    [WithAll(typeof(NodeShowDebugTagComponent))]
+    [WithAll( typeof(NodeComponent))]
+    [WithAll(typeof(NodeNeighborComponent))]
     public partial struct ShowNodeLeftDebugJob : IJobEntity
     {
         public void Execute(
-            in Entity entity,
-            in NodeShowDebugTagComponent showTag,
-            in NodeComponent node,
             in NodeRootReferenceComponent nodeRootReference,
-            in NodeSphericalCoordinatesComponent nodeCoordinates,
-            in NodeLeftNeighborComponent nodeLeftNeighbor)
+            in NodeSphericalCoordinatesComponent nodeCoordinates)
         {
             double3 top = nodeRootReference.RootToWorld + nodeCoordinates.TopCartesian;
             double3 bottomLeft = nodeRootReference.RootToWorld + nodeCoordinates.BottomLeftCartesian;
@@ -41,15 +41,15 @@ namespace PCB.Icosahedron.ECS.Systems
         }
     }
     
+    [WithNone(typeof(NodeSubdividedRightNeighborsComponent))]
+    [WithAll(typeof(NodeShowDebugTagComponent))]
+    [WithAll( typeof(NodeComponent))]
+    [WithAll(typeof(NodeNeighborComponent))]
     public partial struct ShowNodeRightDebugJob : IJobEntity
     {
         public void Execute(
-            in Entity entity,
-            in NodeShowDebugTagComponent showTag,
-            in NodeComponent node,
             in NodeRootReferenceComponent nodeRootReference,
-            in NodeSphericalCoordinatesComponent nodeCoordinates,
-            in NodeRightNeighborComponent nodeRightNeighbor)
+            in NodeSphericalCoordinatesComponent nodeCoordinates)
         {
             double3 top = nodeRootReference.RootToWorld + nodeCoordinates.TopCartesian;
             double3 bottomRight = nodeRootReference.RootToWorld + nodeCoordinates.BottomRightCartesian;
@@ -58,15 +58,15 @@ namespace PCB.Icosahedron.ECS.Systems
         }
     }
     
+    [WithNone(typeof(NodeSubdividedBottomNeighborsComponent))]
+    [WithAll(typeof(NodeShowDebugTagComponent))]
+    [WithAll( typeof(NodeComponent))]
+    [WithAll(typeof(NodeNeighborComponent))]
     public partial struct ShowNodeBottomDebugJob : IJobEntity
     {
         public void Execute(
-            in Entity entity,
-            in NodeShowDebugTagComponent showTag,
-            in NodeComponent node,
             in NodeRootReferenceComponent nodeRootReference,
-            in NodeSphericalCoordinatesComponent nodeCoordinates,
-            in NodeBottomNeighborComponent nodeTopLeftNeighbor)
+            in NodeSphericalCoordinatesComponent nodeCoordinates)
         {
             double3 bottomLeft = nodeRootReference.RootToWorld + nodeCoordinates.BottomLeftCartesian;
             double3 bottomRight = nodeRootReference.RootToWorld + nodeCoordinates.BottomRightCartesian;
@@ -75,15 +75,15 @@ namespace PCB.Icosahedron.ECS.Systems
         }
     }  
     
+    [WithAll(typeof(NodeSubdividedLeftNeighborsComponent))]
+    [WithAll(typeof(NodeShowDebugTagComponent))]
+    [WithAll( typeof(NodeComponent))]
+    [WithAll(typeof(NodeNeighborComponent))]
     public partial struct ShowNodeSubdividedLeftDebugJob : IJobEntity
     {
         public void Execute(
-            in Entity entity,
-            in NodeShowDebugTagComponent showTag,
-            in NodeComponent node,
             in NodeRootReferenceComponent nodeRootReference,
-            in NodeSphericalCoordinatesComponent nodeCoordinates,
-            in NodeSubdividedLeftNeighborsComponent nodeTopLeftNeighbor)
+            in NodeSphericalCoordinatesComponent nodeCoordinates)
         {
             double3 top = nodeRootReference.RootToWorld + nodeCoordinates.TopCartesian;
             double3 leftCenter = nodeRootReference.RootToWorld + nodeCoordinates.LeftCenterCartesian;
@@ -94,15 +94,15 @@ namespace PCB.Icosahedron.ECS.Systems
         }
     }
     
+    [WithAll(typeof(NodeSubdividedRightNeighborsComponent))]
+    [WithAll(typeof(NodeShowDebugTagComponent))]
+    [WithAll( typeof(NodeComponent))]
+    [WithAll(typeof(NodeNeighborComponent))]
     public partial struct ShowNodeSubdividedRightDebugJob : IJobEntity
     {
         public void Execute(
-            in Entity entity,
-            in NodeShowDebugTagComponent showTag,
-            in NodeComponent node,
             in NodeRootReferenceComponent nodeRootReference,
-            in NodeSphericalCoordinatesComponent nodeCoordinates,
-            in NodeSubdividedRightNeighborsComponent nodeTopLeftNeighbor)
+            in NodeSphericalCoordinatesComponent nodeCoordinates)
         {
             double3 top = nodeRootReference.RootToWorld + nodeCoordinates.TopCartesian;
             double3 rightCenter = nodeRootReference.RootToWorld + nodeCoordinates.RightCenterCartesian;
@@ -113,15 +113,15 @@ namespace PCB.Icosahedron.ECS.Systems
         }
     }
     
+    [WithAll(typeof(NodeSubdividedBottomNeighborsComponent))]
+    [WithAll(typeof(NodeShowDebugTagComponent))]
+    [WithAll( typeof(NodeComponent))]
+    [WithAll(typeof(NodeNeighborComponent))]
     public partial struct ShowNodeSubdividedBottomDebugJob : IJobEntity
     {
         public void Execute(
-            in Entity entity,
-            in NodeShowDebugTagComponent showTag,
-            in NodeComponent node,
             in NodeRootReferenceComponent nodeRootReference,
-            in NodeSphericalCoordinatesComponent nodeCoordinates,
-            in NodeSubdividedBottomNeighborsComponent nodeTopLeftNeighbor)
+            in NodeSphericalCoordinatesComponent nodeCoordinates)
         {
             double3 bottomLeft = nodeRootReference.RootToWorld + nodeCoordinates.BottomLeftCartesian;
             double3 bottomCenter = nodeRootReference.RootToWorld + nodeCoordinates.BottomCenterCartesian;

@@ -5,8 +5,9 @@ using Unity.Entities;
 namespace PCB.Icosahedron.ECS.Components
 {
     [BurstCompile]
-    public struct NodeChildComponent : ICleanupComponentData
+    [InternalBufferCapacity(20)]
+    public struct NodeChildComponent : IBufferElementData
     {
-        public NativeList<Entity> ChildNodeEntities;
+        public Entity ChildNodeEntity;
     }
 }
