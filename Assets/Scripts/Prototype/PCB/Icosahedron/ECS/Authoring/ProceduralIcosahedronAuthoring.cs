@@ -12,6 +12,10 @@ namespace PCB.Icosahedron.ECS.Authoring
             
         [Range(1, 8)]
         public uint chunkSubdivisionCount;
+
+        public double subdivisionDistance;
+
+        public double unsubdivisionDistance;
         
         private class ProceduralIcosahedronAuthoringBaker : Baker<ProceduralIcosahedronAuthoring>
         {
@@ -24,6 +28,14 @@ namespace PCB.Icosahedron.ECS.Authoring
                     PlanetRadiusMeters = authoring.planetRadius,
                     Scale = authoring.scale,
                     ChunkSubdivisionCount = authoring.chunkSubdivisionCount
+                });
+                
+                this.AddComponent(entity, new NodeDistanceSubdivisionSettingsComponent
+                {
+                    subdivisionDistance = authoring.subdivisionDistance,
+                    unsubdivisionDistance = authoring.subdivisionDistance < authoring.unsubdivisionDistance 
+                        ? authoring.subdivisionDistance 
+                        : authoring.unsubdivisionDistance
                 });
             }
         }

@@ -9,6 +9,7 @@ using Unity.Transforms;
 
 namespace PCB.Icosahedron.ECS.Systems
 {
+    [BurstCompile]
     [UpdateBefore(typeof(TransformSystemGroup))]
     [UpdateBefore(typeof(NodeRootReferenceUpdateSystem))]
     public partial struct RootInitialGenerationSystem : ISystem
@@ -30,16 +31,19 @@ namespace PCB.Icosahedron.ECS.Systems
         }
     }
 
+    [BurstCompile]
     [WithNone(typeof(RootGeneratedTagComponent))]
     public partial struct RootInitialGenerationJob : IJobEntity
     {
         public EntityCommandBuffer.ParallelWriter EntityCommandBuffer;
         
+        [BurstCompile]
         public void Execute(
             [ChunkIndexInQuery]
             in int chunkIndexInQuery,
             in Entity entity,
-            in RootComponent rootComponent
+            in RootComponent rootComponent,
+            in NodeDistanceSubdivisionSettingsComponent distanceSubdivisionSettings
         )
         {
             double phi = (1 + math.sqrt(5.0)) / 2.0;
@@ -76,8 +80,6 @@ namespace PCB.Icosahedron.ECS.Systems
                     new float4x4(quaternion.EulerXYZ(0.0f, (float) topRotationDegrees.ToRadians().azimuth, 0.0f),
                     float3.zero
                     ));
-
-            double4x4 rotationMatrix = yCounterRotationMatrix * xRotationMatrix * yRotationMatrix;
 
             for (int i = 0; i < verticesCartesian.Length; i++)
             {
@@ -188,6 +190,24 @@ namespace PCB.Icosahedron.ECS.Systems
                 });
                 
                 this.EntityCommandBuffer.AddComponent<NodeShowDebugTagComponent>(chunkIndexInQuery, childEntities[i]);
+                
+                this.EntityCommandBuffer.AddComponent(chunkIndexInQuery, childEntities[i], new NodeDistanceSubdivisionSettingsComponent
+                {
+                    subdivisionDistance = distanceSubdivisionSettings.subdivisionDistance,
+                    unsubdivisionDistance = distanceSubdivisionSettings.unsubdivisionDistance
+                });
+                
+                this.EntityCommandBuffer.AddComponent<NodeDistanceShouldSubdivideTagComponent>(chunkIndexInQuery, childEntities[i]);
+                this.EntityCommandBuffer.AddComponent<NodeDistanceShouldUnsubdivideTagComponent>(chunkIndexInQuery, childEntities[i]);
+                this.EntityCommandBuffer.AddComponent<NodeNeighborShouldSubdivideTagComponent>(chunkIndexInQuery, childEntities[i]);
+                this.EntityCommandBuffer.AddComponent<NodeSubdivideTagComponent>(chunkIndexInQuery, childEntities[i]);
+                this.EntityCommandBuffer.AddComponent<NodeUnsubdivideTagComponent>(chunkIndexInQuery, childEntities[i]);
+                
+                this.EntityCommandBuffer.SetComponentEnabled<NodeDistanceShouldSubdivideTagComponent>(chunkIndexInQuery, childEntities[i], false);
+                this.EntityCommandBuffer.SetComponentEnabled<NodeDistanceShouldUnsubdivideTagComponent>(chunkIndexInQuery, childEntities[i], false);
+                this.EntityCommandBuffer.SetComponentEnabled<NodeNeighborShouldSubdivideTagComponent>(chunkIndexInQuery, childEntities[i], false);
+                this.EntityCommandBuffer.SetComponentEnabled<NodeSubdivideTagComponent>(chunkIndexInQuery, childEntities[i], false);
+                this.EntityCommandBuffer.SetComponentEnabled<NodeUnsubdivideTagComponent>(chunkIndexInQuery, childEntities[i], false);
             }
             
             NativeList<Entity> leftNeighborEntities = new NativeList<Entity>(childEntities.Length, Allocator.Temp);

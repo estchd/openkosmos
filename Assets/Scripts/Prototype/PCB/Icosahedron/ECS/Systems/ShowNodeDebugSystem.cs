@@ -8,6 +8,7 @@ using UnityEngine;
 
 namespace PCB.Icosahedron.ECS.Systems
 {
+    [BurstCompile]
     [UpdateInGroup(typeof(SimulationSystemGroup))]
     [UpdateAfter(typeof(NodeRootReferenceUpdateSystem))]
     public partial struct ShowNodeDebugSystem : ISystem
@@ -24,12 +25,14 @@ namespace PCB.Icosahedron.ECS.Systems
         }
     }
     
+    [BurstCompile]
     [WithNone(typeof(NodeSubdividedLeftNeighborsComponent))]
     [WithAll(typeof(NodeShowDebugTagComponent))]
     [WithAll( typeof(NodeComponent))]
     [WithAll(typeof(NodeNeighborComponent))]
     public partial struct ShowNodeLeftDebugJob : IJobEntity
     {
+        [BurstCompile]
         public void Execute(
             in NodeRootReferenceComponent nodeRootReference,
             in NodeSphericalCoordinatesComponent nodeCoordinates)
@@ -41,6 +44,7 @@ namespace PCB.Icosahedron.ECS.Systems
         }
     }
     
+    [BurstCompile]
     [WithNone(typeof(NodeSubdividedRightNeighborsComponent))]
     [WithAll(typeof(NodeShowDebugTagComponent))]
     [WithAll( typeof(NodeComponent))]
@@ -58,12 +62,14 @@ namespace PCB.Icosahedron.ECS.Systems
         }
     }
     
+    [BurstCompile]
     [WithNone(typeof(NodeSubdividedBottomNeighborsComponent))]
     [WithAll(typeof(NodeShowDebugTagComponent))]
     [WithAll( typeof(NodeComponent))]
     [WithAll(typeof(NodeNeighborComponent))]
     public partial struct ShowNodeBottomDebugJob : IJobEntity
     {
+        [BurstCompile]
         public void Execute(
             in NodeRootReferenceComponent nodeRootReference,
             in NodeSphericalCoordinatesComponent nodeCoordinates)
@@ -75,12 +81,14 @@ namespace PCB.Icosahedron.ECS.Systems
         }
     }  
     
+    [BurstCompile]
     [WithAll(typeof(NodeSubdividedLeftNeighborsComponent))]
     [WithAll(typeof(NodeShowDebugTagComponent))]
     [WithAll( typeof(NodeComponent))]
     [WithAll(typeof(NodeNeighborComponent))]
     public partial struct ShowNodeSubdividedLeftDebugJob : IJobEntity
     {
+        [BurstCompile]
         public void Execute(
             in NodeRootReferenceComponent nodeRootReference,
             in NodeSphericalCoordinatesComponent nodeCoordinates)
@@ -94,12 +102,14 @@ namespace PCB.Icosahedron.ECS.Systems
         }
     }
     
+    [BurstCompile]
     [WithAll(typeof(NodeSubdividedRightNeighborsComponent))]
     [WithAll(typeof(NodeShowDebugTagComponent))]
     [WithAll( typeof(NodeComponent))]
     [WithAll(typeof(NodeNeighborComponent))]
     public partial struct ShowNodeSubdividedRightDebugJob : IJobEntity
     {
+        [BurstCompile]
         public void Execute(
             in NodeRootReferenceComponent nodeRootReference,
             in NodeSphericalCoordinatesComponent nodeCoordinates)
@@ -113,6 +123,7 @@ namespace PCB.Icosahedron.ECS.Systems
         }
     }
     
+    [BurstCompile]
     [WithAll(typeof(NodeSubdividedBottomNeighborsComponent))]
     [WithAll(typeof(NodeShowDebugTagComponent))]
     [WithAll( typeof(NodeComponent))]

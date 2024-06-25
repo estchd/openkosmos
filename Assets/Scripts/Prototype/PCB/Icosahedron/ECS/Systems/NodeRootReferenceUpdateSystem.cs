@@ -30,11 +30,13 @@ namespace PCB.Icosahedron.ECS.Systems
         }
     }
 
+    [BurstCompile]
     public partial struct NodeRootReferenceUpdateJob : IJobEntity
     {
         [ReadOnly]
         public ComponentLookup<LocalToWorld> LocalToWorldLookup;
 
+        [BurstCompile]
         public void Execute(ref NodeRootReferenceComponent rootReferenceComponent)
         {
             if (!this.LocalToWorldLookup.HasComponent(rootReferenceComponent.Root))

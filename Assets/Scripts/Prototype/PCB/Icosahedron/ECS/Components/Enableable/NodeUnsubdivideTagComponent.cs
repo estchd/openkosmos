@@ -2,7 +2,7 @@
 
 namespace PCB.Icosahedron.ECS.Components.Tags
 {
-    public struct NodeSubdivideTagComponent : IComponentData
+    public struct NodeUnsubdivideTagComponent : IComponentData, IEnableableComponent
     {
         
     }
