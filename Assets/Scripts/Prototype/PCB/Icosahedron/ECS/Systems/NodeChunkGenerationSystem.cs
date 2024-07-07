@@ -1,5 +1,6 @@
 ﻿using PCB.Icosahedron.ECS.Components;
 using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 
@@ -10,14 +11,15 @@ namespace PCB.Icosahedron.ECS.Systems
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            EntityCommandBuffer ecb = new EntityCommandBuffer();
+            EntityCommandBuffer ecb = new EntityCommandBuffer(Allocator.TempJob);
 
             new NodeChunkGenerationJob
             {
-                EntityCommandBuffer = ecb.AsParallelWriter()
-            }.ScheduleParallel();
+                EntityCommandBuffer = ecb
+            }.Schedule();
 
             ecb.Playback(state.EntityManager);
+            ecb.Dispose();
         }
     }
 
@@ -25,12 +27,10 @@ namespace PCB.Icosahedron.ECS.Systems
     [WithNone(typeof(NodeChunkReferenceComponent))]
     public partial struct NodeChunkGenerationJob : IJobEntity
     {
-        public EntityCommandBuffer.ParallelWriter EntityCommandBuffer;
+        public EntityCommandBuffer EntityCommandBuffer;
         
         [BurstCompile]
         public void Execute(
-            [ChunkIndexInQuery]
-            in int chunkIndexInQuery,
             in Entity entity,
             in NodeComponent node,
             in NodeSphericalCoordinatesComponent coordinates)

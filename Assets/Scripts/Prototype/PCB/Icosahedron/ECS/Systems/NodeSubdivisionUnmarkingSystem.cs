@@ -12,105 +12,95 @@ namespace PCB.Icosahedron.ECS.Systems
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            EntityCommandBuffer ecb = new EntityCommandBuffer(Allocator.Temp);
+            EntityCommandBuffer ecb = new EntityCommandBuffer(Allocator.TempJob);
 
             new NodeDistanceSubdivisionUnmarkingJob
             {
-                ecb = ecb.AsParallelWriter()
-            }.ScheduleParallel();
+                ecb = ecb
+            }.Schedule();
             
             new NodeDistanceUnsubdivisionUnmarkingJob
             {
-                ecb = ecb.AsParallelWriter()
-            }.ScheduleParallel();
+                ecb = ecb
+            }.Schedule();
             
             new NodeNeighborSubdivisionUnmarkingJob
             {
-                ecb = ecb.AsParallelWriter()
-            }.ScheduleParallel();
+                ecb = ecb
+            }.Schedule();
             
             new NodeSubdivisionUnmarkingJob
             {
-                ecb = ecb.AsParallelWriter()
-            }.ScheduleParallel();
+                ecb = ecb
+            }.Schedule();
             
             new NodeUnsubdivisionUnmarkingJob
             {
-                ecb = ecb.AsParallelWriter()
-            }.ScheduleParallel();
+                ecb = ecb
+            }.Schedule();
             
-            state.Dependency.Complete();
             ecb.Playback(state.EntityManager);
+            ecb.Dispose();
         }
     }
 
     [WithAll(typeof(NodeDistanceShouldSubdivideTagComponent))]
     public partial struct NodeDistanceSubdivisionUnmarkingJob : IJobEntity
     {
-        public EntityCommandBuffer.ParallelWriter ecb;
+        public EntityCommandBuffer ecb;
         
         public void Execute(
-            [ChunkIndexInQuery]
-            in int chunkIndexInQuery,
             in Entity entity)
         {
-            this.ecb.SetComponentEnabled<NodeDistanceShouldSubdivideTagComponent>(chunkIndexInQuery, entity, false);
+            this.ecb.SetComponentEnabled<NodeDistanceShouldSubdivideTagComponent>(entity, false);
         }
     }
     
     [WithAll(typeof(NodeDistanceShouldUnsubdivideTagComponent))]
     public partial struct NodeDistanceUnsubdivisionUnmarkingJob : IJobEntity
     {
-        public EntityCommandBuffer.ParallelWriter ecb;
+        public EntityCommandBuffer ecb;
         
         public void Execute(
-            [ChunkIndexInQuery]
-            in int chunkIndexInQuery,
             in Entity entity)
         {
-            this.ecb.SetComponentEnabled<NodeDistanceShouldUnsubdivideTagComponent>(chunkIndexInQuery, entity, false);
+            this.ecb.SetComponentEnabled<NodeDistanceShouldUnsubdivideTagComponent>(entity, false);
         }
     }
     
     [WithAll(typeof(NodeNeighborShouldSubdivideTagComponent))]
     public partial struct NodeNeighborSubdivisionUnmarkingJob : IJobEntity
     {
-        public EntityCommandBuffer.ParallelWriter ecb;
+        public EntityCommandBuffer ecb;
         
         public void Execute(
-            [ChunkIndexInQuery]
-            in int chunkIndexInQuery,
             in Entity entity)
         {
-            this.ecb.SetComponentEnabled<NodeNeighborShouldSubdivideTagComponent>(chunkIndexInQuery, entity, false);
+            this.ecb.SetComponentEnabled<NodeNeighborShouldSubdivideTagComponent>(entity, false);
         }
     }
     
     [WithAll(typeof(NodeSubdivideTagComponent))]
     public partial struct NodeSubdivisionUnmarkingJob : IJobEntity
     {
-        public EntityCommandBuffer.ParallelWriter ecb;
+        public EntityCommandBuffer ecb;
         
         public void Execute(
-            [ChunkIndexInQuery]
-            in int chunkIndexInQuery,
             in Entity entity)
         {
-            this.ecb.SetComponentEnabled<NodeSubdivideTagComponent>(chunkIndexInQuery, entity, false);
+            this.ecb.SetComponentEnabled<NodeSubdivideTagComponent>(entity, false);
         }
     }
     
     [WithAll(typeof(NodeUnsubdivideTagComponent))]
     public partial struct NodeUnsubdivisionUnmarkingJob : IJobEntity
     {
-        public EntityCommandBuffer.ParallelWriter ecb;
+        public EntityCommandBuffer ecb;
         
         public void Execute(
-            [ChunkIndexInQuery]
-            in int chunkIndexInQuery,
             in Entity entity)
         {
-            this.ecb.SetComponentEnabled<NodeUnsubdivideTagComponent>(chunkIndexInQuery, entity, false);
+            this.ecb.SetComponentEnabled<NodeUnsubdivideTagComponent>(entity, false);
         }
     }
 }

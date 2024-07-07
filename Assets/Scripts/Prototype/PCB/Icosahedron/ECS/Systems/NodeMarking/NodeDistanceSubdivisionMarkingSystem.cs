@@ -1,5 +1,6 @@
 ﻿using PCB.Icosahedron.ECS.Components;
 using PCB.Icosahedron.ECS.Components.Tags;
+using PCB.Icosahedron.ECS.SystemGroups;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -9,6 +10,7 @@ using UnityEngine.SocialPlatforms;
 
 namespace PCB.Icosahedron.ECS.Systems
 {
+    [UpdateInGroup(typeof(NodeMarkingSystemGroup))]
     [BurstCompile]
     public partial struct NodeDistanceSubdivisionMarkingSystem : ISystem
     {
@@ -17,7 +19,7 @@ namespace PCB.Icosahedron.ECS.Systems
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
-            this._query = new EntityQueryBuilder()
+            this._query = new EntityQueryBuilder(Allocator.Persistent)
                 .WithAll<PcbSubdivisionDistanceTargetComponent>()
                 .WithAll<LocalToWorld>()
                 .Build(ref state);
@@ -27,7 +29,7 @@ namespace PCB.Icosahedron.ECS.Systems
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            EntityCommandBuffer ecb = new EntityCommandBuffer(Allocator.Temp);
+            EntityCommandBuffer ecb = new EntityCommandBuffer(Allocator.TempJob);
             
             NativeArray<Entity> targetEntities = this._query.ToEntityArray(Allocator.Temp);
             
@@ -36,13 +38,11 @@ namespace PCB.Icosahedron.ECS.Systems
 
             new NodeDistanceSubdivisionMarkingJob
             {
-                EntityCommandBuffer = ecb.AsParallelWriter(),
+                EntityCommandBuffer = ecb,
                 TargetEntities = targetEntities,
                 TargetComponentLookup = targetComponentLookup,
                 LocalToWorldLookup = localToWorldLookup
-            }.ScheduleParallel();
-            
-            state.Dependency.Complete();
+            }.Schedule();
             
             ecb.Playback(state.EntityManager);
             ecb.Dispose();
@@ -55,7 +55,7 @@ namespace PCB.Icosahedron.ECS.Systems
     [WithPresent(typeof(NodeDistanceShouldUnsubdivideTagComponent))]
     public partial struct NodeDistanceSubdivisionMarkingJob : IJobEntity
     {
-        public EntityCommandBuffer.ParallelWriter EntityCommandBuffer;
+        public EntityCommandBuffer EntityCommandBuffer;
 
         public NativeArray<Entity> TargetEntities;
 
@@ -66,7 +66,6 @@ namespace PCB.Icosahedron.ECS.Systems
 
         [BurstCompile]
         public void Execute(
-            [ChunkIndexInQuery] in int chunkIndexInQuery,
             in Entity entity,
             in LocalToWorld localToWorld,
             in NodeDistanceSubdivisionSettingsComponent distanceSubdivisionSettings)
@@ -101,12 +100,12 @@ namespace PCB.Icosahedron.ECS.Systems
 
             if (closestDistance < distanceSubdivisionSettings.subdivisionDistance)
             {
-                this.EntityCommandBuffer.SetComponentEnabled<NodeDistanceShouldSubdivideTagComponent>(chunkIndexInQuery, entity, true);
+                this.EntityCommandBuffer.SetComponentEnabled<NodeDistanceShouldSubdivideTagComponent>(entity, true);
             }
 
             if (closestDistance > distanceSubdivisionSettings.unsubdivisionDistance)
             {
-                this.EntityCommandBuffer.SetComponentEnabled<NodeDistanceShouldUnsubdivideTagComponent>(chunkIndexInQuery, entity, true);
+                this.EntityCommandBuffer.SetComponentEnabled<NodeDistanceShouldUnsubdivideTagComponent>(entity, true);
             }
         }
     }

@@ -1,33 +1,35 @@
 ﻿using PCB.Icosahedron.ECS.Components.Tags;
+using PCB.Icosahedron.ECS.SystemGroups;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 
 namespace PCB.Icosahedron.ECS.Systems
 {
+    [UpdateInGroup(typeof(NodeMarkingSystemGroup), OrderLast = true)]
+    [BurstCompile]
     public partial struct NodeSubdivisionMarkerReconciliationSystem : ISystem
     {
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            EntityCommandBuffer ecb = new EntityCommandBuffer(Allocator.Temp);
+            EntityCommandBuffer ecb = new EntityCommandBuffer(Allocator.TempJob);
 
             new NodeDistanceSubdivisionMarkerReconciliationSystem
             {
-                EntityCommandBuffer = ecb.AsParallelWriter()
-            }.ScheduleParallel();
+                EntityCommandBuffer = ecb
+            }.Schedule();
             
             new NodeDistanceUnsubdivisionMarkerReconciliationSystem
             {
-                EntityCommandBuffer = ecb.AsParallelWriter()
-            }.ScheduleParallel();
+                EntityCommandBuffer = ecb
+            }.Schedule();
             
             new NodeDistanceConflictingSubdivisionMarkerReconciliationSystem()
             {
-                EntityCommandBuffer = ecb.AsParallelWriter()
-            }.ScheduleParallel();
+                EntityCommandBuffer = ecb
+            }.Schedule();
             
-            state.Dependency.Complete();
             ecb.Playback(state.EntityManager);
             ecb.Dispose();
         }
@@ -38,16 +40,14 @@ namespace PCB.Icosahedron.ECS.Systems
     [WithDisabled(typeof(NodeNeighborShouldSubdivideTagComponent))]
     public partial struct NodeDistanceSubdivisionMarkerReconciliationSystem : IJobEntity
     {
-        public EntityCommandBuffer.ParallelWriter EntityCommandBuffer;
+        public EntityCommandBuffer EntityCommandBuffer;
 
         public void Execute(
-            [ChunkIndexInQuery] 
-            in int chunkIndexInQuery,
             in Entity entity
         )
         {
-            this.EntityCommandBuffer.SetComponentEnabled<NodeDistanceShouldSubdivideTagComponent>(chunkIndexInQuery, entity, false);
-            this.EntityCommandBuffer.SetComponentEnabled<NodeSubdivideTagComponent>(chunkIndexInQuery, entity, true);
+            this.EntityCommandBuffer.SetComponentEnabled<NodeDistanceShouldSubdivideTagComponent>(entity, false);
+            this.EntityCommandBuffer.SetComponentEnabled<NodeSubdivideTagComponent>(entity, true);
         }
     }
     
@@ -56,16 +56,14 @@ namespace PCB.Icosahedron.ECS.Systems
     [WithDisabled(typeof(NodeNeighborShouldSubdivideTagComponent))]
     public partial struct NodeDistanceUnsubdivisionMarkerReconciliationSystem : IJobEntity
     {
-        public EntityCommandBuffer.ParallelWriter EntityCommandBuffer;
+        public EntityCommandBuffer EntityCommandBuffer;
 
         public void Execute(
-            [ChunkIndexInQuery] 
-            in int chunkIndexInQuery,
             in Entity entity
         )
         {
-            this.EntityCommandBuffer.SetComponentEnabled<NodeDistanceShouldUnsubdivideTagComponent>(chunkIndexInQuery, entity, false);
-            this.EntityCommandBuffer.SetComponentEnabled<NodeUnsubdivideTagComponent>(chunkIndexInQuery, entity, true);
+            this.EntityCommandBuffer.SetComponentEnabled<NodeDistanceShouldUnsubdivideTagComponent>(entity, false);
+            this.EntityCommandBuffer.SetComponentEnabled<NodeUnsubdivideTagComponent>(entity, true);
         }
     }
     
@@ -74,16 +72,14 @@ namespace PCB.Icosahedron.ECS.Systems
     [WithDisabled(typeof(NodeNeighborShouldSubdivideTagComponent))]
     public partial struct NodeDistanceConflictingSubdivisionMarkerReconciliationSystem : IJobEntity
     {
-        public EntityCommandBuffer.ParallelWriter EntityCommandBuffer;
+        public EntityCommandBuffer EntityCommandBuffer;
 
         public void Execute(
-            [ChunkIndexInQuery] 
-            in int chunkIndexInQuery,
             in Entity entity
         )
         {
-            this.EntityCommandBuffer.SetComponentEnabled<NodeDistanceShouldSubdivideTagComponent>(chunkIndexInQuery, entity, false);
-            this.EntityCommandBuffer.SetComponentEnabled<NodeDistanceShouldUnsubdivideTagComponent>(chunkIndexInQuery, entity, false);
+            this.EntityCommandBuffer.SetComponentEnabled<NodeDistanceShouldSubdivideTagComponent>(entity, false);
+            this.EntityCommandBuffer.SetComponentEnabled<NodeDistanceShouldUnsubdivideTagComponent>(entity, false);
         }
     }
 }

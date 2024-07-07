@@ -21,11 +21,9 @@ namespace PCB.Icosahedron.ECS.Systems
 
             new RootInitialGenerationJob
             {
-                EntityCommandBuffer = ecb.AsParallelWriter()
-            }.ScheduleParallel();
+                EntityCommandBuffer = ecb
+            }.Schedule();
 
-            state.Dependency.Complete();
-            
             ecb.Playback(state.EntityManager);
             ecb.Dispose();
         }
@@ -35,12 +33,10 @@ namespace PCB.Icosahedron.ECS.Systems
     [WithNone(typeof(RootGeneratedTagComponent))]
     public partial struct RootInitialGenerationJob : IJobEntity
     {
-        public EntityCommandBuffer.ParallelWriter EntityCommandBuffer;
+        public EntityCommandBuffer EntityCommandBuffer;
         
         [BurstCompile]
         public void Execute(
-            [ChunkIndexInQuery]
-            in int chunkIndexInQuery,
             in Entity entity,
             in RootComponent rootComponent,
             in NodeDistanceSubdivisionSettingsComponent distanceSubdivisionSettings
@@ -138,76 +134,76 @@ namespace PCB.Icosahedron.ECS.Systems
             
             NativeList<Entity> childEntities = new NativeList<Entity>(Allocator.Persistent);
 
-            DynamicBuffer<NodeChildComponent> childBuffer = this.EntityCommandBuffer.AddBuffer<NodeChildComponent>(chunkIndexInQuery, entity);
+            DynamicBuffer<NodeChildComponent> childBuffer = this.EntityCommandBuffer.AddBuffer<NodeChildComponent>(entity);
 
             for (int i = 0; i < nodes.Length; i++)
             {
-                childEntities.Add(this.EntityCommandBuffer.CreateEntity(chunkIndexInQuery));
+                childEntities.Add(this.EntityCommandBuffer.CreateEntity());
                 
                 childBuffer.Add(new NodeChildComponent
                 {
                     ChildNodeEntity = childEntities[i]
                 });
                 
-                this.EntityCommandBuffer.AddComponent(chunkIndexInQuery, childEntities[i], new Parent
+                this.EntityCommandBuffer.AddComponent(childEntities[i], new Parent
                 {
                     Value = entity
                 });
                 
-                this.EntityCommandBuffer.AddComponent(chunkIndexInQuery, childEntities[i], new LocalTransform
+                this.EntityCommandBuffer.AddComponent(childEntities[i], new LocalTransform
                 {
                     Position = default,
                     Scale = 1,
                     Rotation = default
                 });
                 
-                this.EntityCommandBuffer.AddComponent(chunkIndexInQuery, childEntities[i], new LocalToWorld
+                this.EntityCommandBuffer.AddComponent(childEntities[i], new LocalToWorld
                 {
                     Value = default
                 });
                 
-                this.EntityCommandBuffer.AddComponent(chunkIndexInQuery, childEntities[i], new NodeSphericalCoordinatesComponent
+                this.EntityCommandBuffer.AddComponent(childEntities[i], new NodeSphericalCoordinatesComponent
                 {
                     Top = nodes[i].Item1.ToDegrees(),
                     BottomLeft = nodes[i].Item2.ToDegrees(),
                     BottomRight = nodes[i].Item3.ToDegrees()
                 });
                 
-                this.EntityCommandBuffer.AddComponent(chunkIndexInQuery, childEntities[i], new NodeRootReferenceComponent
+                this.EntityCommandBuffer.AddComponent(childEntities[i], new NodeRootReferenceComponent
                 {
                     Root = entity,
                     RootToWorld = default
                 });
                 
-                this.EntityCommandBuffer.AddComponent(chunkIndexInQuery, childEntities[i], new NodeParentComponent
+                this.EntityCommandBuffer.AddComponent(childEntities[i], new NodeParentComponent
                 {
                     ParentNodeEntity = entity
                 });
                 
-                this.EntityCommandBuffer.AddComponent(chunkIndexInQuery, childEntities[i], new NodeComponent
+                this.EntityCommandBuffer.AddComponent(childEntities[i], new NodeComponent
                 {
                     NodeLevelOfDetail = rootComponent.ChunkSubdivisionCount
                 });
                 
-                this.EntityCommandBuffer.AddComponent<NodeShowDebugTagComponent>(chunkIndexInQuery, childEntities[i]);
+                this.EntityCommandBuffer.AddComponent<NodeShowDebugTagComponent>(childEntities[i]);
                 
-                this.EntityCommandBuffer.AddComponent(chunkIndexInQuery, childEntities[i], new NodeDistanceSubdivisionSettingsComponent
+                this.EntityCommandBuffer.AddComponent(childEntities[i], new NodeDistanceSubdivisionSettingsComponent
                 {
                     subdivisionDistance = distanceSubdivisionSettings.subdivisionDistance,
                     unsubdivisionDistance = distanceSubdivisionSettings.unsubdivisionDistance
                 });
                 
-                this.EntityCommandBuffer.AddComponent<NodeDistanceShouldSubdivideTagComponent>(chunkIndexInQuery, childEntities[i]);
-                this.EntityCommandBuffer.AddComponent<NodeDistanceShouldUnsubdivideTagComponent>(chunkIndexInQuery, childEntities[i]);
-                this.EntityCommandBuffer.AddComponent<NodeNeighborShouldSubdivideTagComponent>(chunkIndexInQuery, childEntities[i]);
-                this.EntityCommandBuffer.AddComponent<NodeSubdivideTagComponent>(chunkIndexInQuery, childEntities[i]);
-                this.EntityCommandBuffer.AddComponent<NodeUnsubdivideTagComponent>(chunkIndexInQuery, childEntities[i]);
+                this.EntityCommandBuffer.AddComponent<NodeDistanceShouldSubdivideTagComponent>(childEntities[i]);
+                this.EntityCommandBuffer.AddComponent<NodeDistanceShouldUnsubdivideTagComponent>(childEntities[i]);
+                this.EntityCommandBuffer.AddComponent<NodeNeighborShouldSubdivideTagComponent>(childEntities[i]);
+                this.EntityCommandBuffer.AddComponent<NodeSubdivideTagComponent>(childEntities[i]);
+                this.EntityCommandBuffer.AddComponent<NodeUnsubdivideTagComponent>(childEntities[i]);
                 
-                this.EntityCommandBuffer.SetComponentEnabled<NodeDistanceShouldSubdivideTagComponent>(chunkIndexInQuery, childEntities[i], false);
-                this.EntityCommandBuffer.SetComponentEnabled<NodeDistanceShouldUnsubdivideTagComponent>(chunkIndexInQuery, childEntities[i], false);
-                this.EntityCommandBuffer.SetComponentEnabled<NodeNeighborShouldSubdivideTagComponent>(chunkIndexInQuery, childEntities[i], false);
-                this.EntityCommandBuffer.SetComponentEnabled<NodeSubdivideTagComponent>(chunkIndexInQuery, childEntities[i], false);
-                this.EntityCommandBuffer.SetComponentEnabled<NodeUnsubdivideTagComponent>(chunkIndexInQuery, childEntities[i], false);
+                this.EntityCommandBuffer.SetComponentEnabled<NodeDistanceShouldSubdivideTagComponent>(childEntities[i], false);
+                this.EntityCommandBuffer.SetComponentEnabled<NodeDistanceShouldUnsubdivideTagComponent>(childEntities[i], false);
+                this.EntityCommandBuffer.SetComponentEnabled<NodeNeighborShouldSubdivideTagComponent>(childEntities[i], false);
+                this.EntityCommandBuffer.SetComponentEnabled<NodeSubdivideTagComponent>(childEntities[i], false);
+                this.EntityCommandBuffer.SetComponentEnabled<NodeUnsubdivideTagComponent>(childEntities[i], false);
             }
             
             NativeList<Entity> leftNeighborEntities = new NativeList<Entity>(childEntities.Length, Allocator.Temp);
@@ -296,7 +292,7 @@ namespace PCB.Icosahedron.ECS.Systems
 
             for (int i = 0; i < childEntities.Length; i++)
             {
-                this.EntityCommandBuffer.AddComponent(chunkIndexInQuery, childEntities[i], new NodeNeighborComponent
+                this.EntityCommandBuffer.AddComponent(childEntities[i], new NodeNeighborComponent
                 {
                     LeftNeighborEntity = leftNeighborEntities[i],
                     RightNeighborEntity = rightNeighborEntities[i],
@@ -304,7 +300,7 @@ namespace PCB.Icosahedron.ECS.Systems
                 });
             }
             
-            this.EntityCommandBuffer.AddComponent<RootGeneratedTagComponent>(chunkIndexInQuery, entity);
+            this.EntityCommandBuffer.AddComponent<RootGeneratedTagComponent>(entity);
         }
     }
 }
